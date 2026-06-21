@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#070916" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>Finger Chooser Web</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <main id="app" class="app">
+    <section class="hud" aria-label="settings">
+      <div class="brand">
+        <div class="brandText">
+          <strong>Finger Chooser</strong>
+          <span id="touchSupport">멀티터치 확인 중</span>
+        </div>
+        <button id="settingsBtn" class="settingsBtn" type="button" aria-expanded="false">설정</button>
+      </div>
+
+      <div id="settingsPanel" class="controls settingsPanel" aria-label="game settings">
+        <label>
+          방식
+          <select id="flowMode">
+            <option value="quick">빠른 손가락 선택</option>
+            <option value="register">많은 사람 등록</option>
+          </select>
+        </label>
+        <label>
+          결과
+          <select id="resultMode">
+            <option value="pick">랜덤 1명 선택</option>
+            <option value="order">순서 정하기</option>
+          </select>
+        </label>
+        <label>
+          시간
+          <input id="duration" type="number" min="1" max="12" step="0.5" value="3" />
+          <span>초</span>
+        </label>
+        <label id="quickMinLabel">
+          최소 손가락
+          <input id="minFingers" type="number" min="2" max="10" step="1" value="2" />
+        </label>
+        <label id="groupMaxLabel">
+          한 조 최대
+          <input id="groupMax" type="number" min="1" max="10" step="1" value="5" />
+        </label>
+        <label class="check">
+          <input id="stableHold" type="checkbox" checked />
+          중간에 손가락 수가 바뀌면 카운트 재시작
+        </label>
+        <button id="fullscreenBtn" class="settingsAction" type="button">전체화면</button>
+      </div>
+
+      <div class="actions">
+        <button id="runRegisteredBtn" type="button">등록자 실행</button>
+        <button id="nextGroupBtn" type="button">확인 후 다음 조</button>
+        <button id="resetBtn" type="button">현재 터치 초기화</button>
+        <button id="clearParticipantsBtn" type="button">등록 전체 삭제</button>
+      </div>
+    </section>
+
+    <section id="stage" class="stage" aria-label="touch area">
+      <div class="centerGuide">
+        <div id="status" class="status">모두 화면에 손가락을 올려주세요</div>
+        <div id="subStatus" class="subStatus">계속 누르고 있어야 참가됩니다</div>
+      </div>
+      <div id="timerRing" class="timerRing" aria-hidden="true"></div>
+      <div id="circles" class="circles" aria-hidden="true"></div>
+    </section>
+
+    <aside id="participantTray" class="participantTray" aria-label="registered participants"></aside>
+    <button id="carouselPrevBtn" class="carouselTap carouselTapLeft" type="button" aria-label="이전 순서">‹</button>
+    <button id="carouselNextBtn" class="carouselTap carouselTapRight" type="button" aria-label="다음 순서">›</button>
+    <div id="carouselCounter" class="carouselCounter" aria-hidden="true"></div>
+  </main>
+  <script src="./app.js?v=20260621-polishedcards"></script>
+</body>
+</html>

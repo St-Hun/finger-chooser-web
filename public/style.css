@@ -1,0 +1,951 @@
+:root {
+  color-scheme: dark;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #070916;
+  color: #f6f7fb;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+.app {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(92, 146, 255, 0.16), transparent 32%),
+    radial-gradient(circle at 85% 15%, rgba(255, 93, 180, 0.13), transparent 30%),
+    linear-gradient(135deg, #070916 0%, #111629 100%);
+}
+
+.hud {
+  z-index: 30;
+  padding: calc(12px + var(--safe-top)) 14px 10px;
+  display: grid;
+  gap: 10px;
+  background: linear-gradient(to bottom, rgba(7, 9, 22, 0.94), rgba(7, 9, 22, 0.42));
+  backdrop-filter: blur(14px);
+}
+
+.brand {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.brand strong {
+  font-size: 18px;
+  letter-spacing: 0.01em;
+}
+
+.brand span {
+  font-size: 12px;
+  color: rgba(246, 247, 251, 0.72);
+  text-align: right;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.controls label {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(246, 247, 251, 0.86);
+  font-size: 13px;
+}
+
+.controls label.check {
+  border-radius: 14px;
+}
+
+select,
+input {
+  max-width: 132px;
+  border: 0;
+  outline: 0;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.10);
+  border-radius: 10px;
+  padding: 6px 8px;
+}
+
+input[type="number"] {
+  width: 58px;
+}
+
+input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #82ffb7;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.actions button {
+  border: 0;
+  border-radius: 14px;
+  padding: 10px 12px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.actions button.primary {
+  background: rgba(130, 255, 183, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(130, 255, 183, 0.28);
+}
+
+.actions button:disabled {
+  opacity: 0.38;
+}
+
+.actions button:active:not(:disabled) {
+  transform: translateY(1px) scale(0.99);
+}
+
+body[data-flow="quick"] #groupMaxLabel,
+body[data-flow="quick"] #runRegisteredBtn,
+body[data-flow="quick"] #nextGroupBtn,
+body[data-flow="quick"] #clearParticipantsBtn,
+body[data-flow="quick"] .participantTray {
+  display: none;
+}
+
+body[data-flow="register"] #quickMinLabel {
+  display: none;
+}
+
+#nextGroupBtn {
+  display: none;
+}
+
+body[data-flow="register"][data-state="registeredReview"] #nextGroupBtn {
+  display: inline-block;
+}
+
+.stage {
+  position: relative;
+  overflow: hidden;
+  touch-action: none;
+  padding-bottom: var(--safe-bottom);
+}
+
+.centerGuide {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  padding: 24px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.status {
+  font-size: clamp(24px, 7vw, 52px);
+  font-weight: 800;
+  line-height: 1.05;
+  text-shadow: 0 8px 40px rgba(0, 0, 0, 0.55);
+}
+
+.subStatus {
+  margin-top: 12px;
+  font-size: clamp(14px, 3vw, 18px);
+  color: rgba(246, 247, 251, 0.68);
+}
+
+.timerRing {
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  width: min(62vw, 340px);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%) scale(var(--timer-scale, 0.9));
+  border-radius: 50%;
+  opacity: var(--timer-opacity, 0);
+  border: 2px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 0 60px rgba(126, 172, 255, 0.18), inset 0 0 60px rgba(126, 172, 255, 0.06);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.circles {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.fingerCircle {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--size, 94px);
+  height: var(--size, 94px);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.96);
+  background:
+    radial-gradient(circle at 34% 25%, rgba(255, 255, 255, 0.72), transparent 12%),
+    hsla(var(--h), 92%, 58%, 0.98);
+  box-shadow:
+    0 0 0 12px hsla(var(--h), 92%, 58%, 0.14),
+    0 12px 42px hsla(var(--h), 92%, 58%, 0.26),
+    inset 0 -14px 30px rgba(0, 0, 0, 0.18);
+}
+
+.fingerCircle::before,
+.fingerCircle::after {
+  content: "";
+  position: absolute;
+  inset: -11px;
+  border-radius: 50%;
+  border: 2px solid hsla(var(--h), 92%, 70%, 0.42);
+  opacity: 0;
+  transform: scale(1);
+}
+
+.circleMain {
+  display: block;
+  font-size: 30px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.circleSub {
+  display: block;
+  max-width: 92px;
+  margin-top: 4px;
+  padding: 0 7px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.1;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
+}
+
+.fingerCircle.counting::before {
+  animation: pulse 860ms ease-in-out infinite;
+}
+
+.fingerCircle.counting::after {
+  animation: pulse 860ms ease-in-out 430ms infinite;
+}
+
+.fingerCircle.winner {
+  --size: 124px;
+  animation: winnerPop 660ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  box-shadow:
+    0 0 0 16px hsla(var(--h), 95%, 70%, 0.19),
+    0 0 76px hsla(var(--h), 95%, 68%, 0.55),
+    inset 0 -14px 30px rgba(0, 0, 0, 0.18);
+}
+
+.fingerCircle.dimmed {
+  opacity: 0.28;
+  filter: grayscale(0.2);
+}
+
+.fingerCircle.ordered {
+  --size: 112px;
+  box-shadow:
+    0 0 0 14px hsla(var(--h), 95%, 70%, 0.19),
+    0 0 54px hsla(var(--h), 95%, 68%, 0.34),
+    inset 0 -14px 30px rgba(0, 0, 0, 0.18);
+}
+
+.fingerCircle.registered {
+  --size: 112px;
+  animation: registeredFloat 1400ms ease-in-out infinite;
+  box-shadow:
+    0 0 0 14px hsla(var(--h), 95%, 70%, 0.18),
+    0 0 54px hsla(var(--h), 95%, 68%, 0.30),
+    inset 0 -14px 30px rgba(0, 0, 0, 0.18);
+}
+
+.participantTray {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(10px + var(--safe-bottom));
+  z-index: 40;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 10px 12px;
+  scrollbar-width: none;
+  pointer-events: auto;
+  touch-action: none;
+  cursor: grab;
+  -webkit-mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 16px), transparent);
+  mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 16px), transparent);
+}
+
+.participantTray.dragging {
+  cursor: grabbing;
+}
+
+.participantTray::-webkit-scrollbar {
+  display: none;
+}
+
+.participantCard {
+  flex: 0 0 auto;
+  min-width: 122px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border-radius: 18px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.09);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 10px 30px rgba(0, 0, 0, 0.20);
+  backdrop-filter: blur(10px);
+}
+
+.participantDot {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: hsla(var(--h), 92%, 58%, 0.98);
+  box-shadow: 0 0 0 5px hsla(var(--h), 92%, 58%, 0.14);
+  font-size: 18px;
+}
+
+.participantText {
+  display: grid;
+  gap: 1px;
+}
+
+.participantNo {
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.participantName {
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.participantCard.selected {
+  background: rgba(130, 255, 183, 0.18);
+  box-shadow: inset 0 0 0 2px rgba(130, 255, 183, 0.68), 0 0 42px rgba(130, 255, 183, 0.20);
+  animation: cardPop 680ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.participantCard.dimmed {
+  opacity: 0.36;
+}
+
+.participantCard.ordered {
+  background: rgba(126, 172, 255, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(126, 172, 255, 0.36), 0 0 28px rgba(126, 172, 255, 0.12);
+}
+
+.resultBadge {
+  grid-column: 1 / -1;
+  display: inline-grid;
+  place-items: center;
+  justify-self: start;
+  min-width: 28px;
+  margin-top: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.56; transform: scale(1); }
+  70% { opacity: 0.06; transform: scale(1.62); }
+  100% { opacity: 0; transform: scale(1.74); }
+}
+
+@keyframes winnerPop {
+  0% { transform: translate(-50%, -50%) scale(0.72); }
+  62% { transform: translate(-50%, -50%) scale(1.12); }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes registeredFloat {
+  0% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -52%) scale(1.035); }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes cardPop {
+  0% { transform: scale(0.9); }
+  64% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+@media (max-width: 720px) {
+  .hud {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .controls {
+    gap: 6px;
+  }
+
+  .controls label {
+    font-size: 12px;
+    min-height: 32px;
+    padding: 5px 8px;
+  }
+
+  .actions button {
+    flex: 1 1 auto;
+  }
+
+  .participantCard {
+    min-width: 112px;
+    padding: 8px;
+  }
+}
+
+/* 2026-06-21: compact HUD + tap-based large result cards */
+.brandText {
+  display: grid;
+  gap: 2px;
+}
+
+.settingsBtn,
+.settingsAction {
+  border: 0;
+  border-radius: 14px;
+  padding: 10px 13px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.settingsBtn[aria-expanded="true"] {
+  background: rgba(130, 255, 183, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(130, 255, 183, 0.28);
+}
+
+.settingsPanel {
+  display: none;
+}
+
+body.settings-open .settingsPanel {
+  display: flex;
+}
+
+body[data-flow="quick"] .actions {
+  display: none;
+}
+
+body[data-flow="register"] .actions {
+  display: flex;
+}
+
+body[data-flow="register"] #groupMaxLabel {
+  display: inline-flex;
+}
+
+body[data-flow="quick"] #groupMaxLabel {
+  display: none;
+}
+
+.carouselTap,
+.carouselCounter {
+  display: none;
+}
+
+body[data-flow="register"][data-state="result"][data-result="order"] .stage .centerGuide {
+  opacity: 0.24;
+}
+
+body[data-flow="register"][data-state="result"][data-result="order"] .participantTray.resultCarousel {
+  top: calc(74px + var(--safe-top));
+  bottom: calc(18px + var(--safe-bottom));
+  left: 0;
+  right: 0;
+  padding: 0;
+  display: block;
+  overflow: hidden;
+  pointer-events: none;
+  touch-action: manipulation;
+  cursor: default;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+.participantTray.resultCarousel .participantCard {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(74vw, 520px);
+  height: min(68vh, 720px);
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto 1fr;
+  align-items: start;
+  gap: clamp(14px, 3vw, 24px);
+  padding: clamp(28px, 6vw, 52px);
+  border-radius: 10px;
+  color: #050505;
+  background: rgba(229, 230, 233, 0.96);
+  box-shadow: 0 26px 82px rgba(0, 0, 0, 0.32), inset 0 0 0 1px rgba(0, 0, 0, 0.04);
+  backdrop-filter: none;
+  opacity: 0;
+  transition: transform 260ms ease, opacity 260ms ease, filter 260ms ease;
+  pointer-events: none;
+}
+
+.participantTray.resultCarousel .participantCard.carouselCurrent {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+  z-index: 3;
+}
+
+.participantTray.resultCarousel .participantCard.carouselPrev {
+  transform: translate(-160%, -50%) scale(0.92);
+  opacity: 0.72;
+  z-index: 2;
+  filter: saturate(0.88);
+}
+
+.participantTray.resultCarousel .participantCard.carouselNext {
+  transform: translate(60%, -50%) scale(0.92);
+  opacity: 0.72;
+  z-index: 2;
+  filter: saturate(0.88);
+}
+
+.participantTray.resultCarousel .participantCard.carouselHiddenLeft {
+  transform: translate(-250%, -50%) scale(0.88);
+  opacity: 0;
+}
+
+.participantTray.resultCarousel .participantCard.carouselHiddenRight {
+  transform: translate(150%, -50%) scale(0.88);
+  opacity: 0;
+}
+
+.participantTray.resultCarousel .participantDot {
+  width: clamp(82px, 14vw, 128px);
+  height: clamp(82px, 14vw, 128px);
+  border: 3px solid hsla(var(--h), 98%, 50%, 0.98);
+  background: transparent;
+  box-shadow: none;
+  color: #111;
+  font-size: clamp(34px, 7vw, 58px);
+}
+
+.participantTray.resultCarousel .participantText {
+  align-self: center;
+  gap: 10px;
+}
+
+.participantTray.resultCarousel .participantNo {
+  color: #050505;
+  font-size: clamp(32px, 6.6vw, 58px);
+  font-weight: 950;
+  line-height: 0.95;
+}
+
+.participantTray.resultCarousel .participantName {
+  color: #050505;
+  font-size: clamp(28px, 6vw, 52px);
+  font-weight: 950;
+  line-height: 1.05;
+  white-space: normal;
+  word-break: keep-all;
+}
+
+.participantTray.resultCarousel .bigOrderNumber {
+  grid-column: 1 / -1;
+  align-self: center;
+  justify-self: center;
+  color: #000;
+  font-size: clamp(180px, 48vw, 420px);
+  font-weight: 1000;
+  line-height: 0.82;
+  letter-spacing: -0.08em;
+}
+
+.participantTray.resultCarousel .resultBadge {
+  display: none;
+}
+
+body[data-flow="register"][data-state="result"][data-result="order"] .carouselTap {
+  display: grid;
+  place-items: center;
+  position: fixed;
+  top: calc(90px + var(--safe-top));
+  bottom: calc(18px + var(--safe-bottom));
+  z-index: 95;
+  width: 31vw;
+  border: 0;
+  color: rgba(255, 255, 255, 0.68);
+  background: transparent;
+  font-size: clamp(56px, 13vw, 120px);
+  font-weight: 200;
+  touch-action: manipulation;
+}
+
+body[data-flow="register"][data-state="result"][data-result="order"] .carouselTap:active {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.carouselTapLeft {
+  left: 0;
+  justify-content: start;
+  padding-left: 6px;
+}
+
+.carouselTapRight {
+  right: 0;
+  justify-content: end;
+  padding-right: 6px;
+}
+
+body[data-flow="register"][data-state="result"][data-result="order"] .carouselCounter {
+  display: block;
+  position: fixed;
+  left: 50%;
+  bottom: calc(16px + var(--safe-bottom));
+  transform: translateX(-50%);
+  z-index: 96;
+  padding: 7px 12px;
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.86);
+  background: rgba(0, 0, 0, 0.38);
+  backdrop-filter: blur(10px);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+@media (max-width: 720px) {
+  .brand {
+    align-items: center;
+  }
+
+  .settingsBtn {
+    padding: 9px 12px;
+  }
+
+  body[data-flow="register"][data-state="result"][data-result="order"] .participantTray.resultCarousel {
+    top: calc(62px + var(--safe-top));
+    bottom: calc(22px + var(--safe-bottom));
+  }
+
+  .participantTray.resultCarousel .participantCard {
+    width: 74vw;
+    height: min(70vh, 680px);
+    padding: clamp(22px, 5vw, 38px);
+  }
+}
+
+/* Polished order carousel cards */
+body[data-flow="register"][data-state="result"][data-result="order"] .participantTray.resultCarousel {
+  top: calc(78px + var(--safe-top));
+  bottom: calc(24px + var(--safe-bottom));
+  background:
+    radial-gradient(circle at 50% 14%, rgba(255,255,255,0.10), transparent 34%),
+    radial-gradient(circle at 50% 92%, rgba(126,172,255,0.10), transparent 32%);
+}
+
+.participantTray.resultCarousel .participantCard {
+  width: min(78vw, 540px);
+  height: min(68vh, 700px);
+  min-height: 420px;
+  padding: clamp(20px, 5vw, 38px);
+  border-radius: clamp(28px, 7vw, 46px);
+  color: #fff;
+  background:
+    radial-gradient(circle at 24% 18%, hsla(var(--h), 96%, 64%, 0.42), transparent 32%),
+    radial-gradient(circle at 88% 12%, rgba(255,255,255,0.18), transparent 24%),
+    linear-gradient(160deg, rgba(255,255,255,0.18), rgba(255,255,255,0.075)),
+    rgba(13, 17, 35, 0.94);
+  box-shadow:
+    0 34px 96px rgba(0,0,0,0.42),
+    0 0 0 1px rgba(255,255,255,0.16) inset,
+    0 0 70px hsla(var(--h), 92%, 58%, 0.22);
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr auto;
+  align-items: stretch;
+}
+
+.participantTray.resultCarousel .participantCard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.20), transparent 30%, transparent 68%, rgba(255,255,255,0.06)),
+    linear-gradient(to bottom, transparent, rgba(0,0,0,0.18));
+  pointer-events: none;
+  z-index: 0;
+}
+
+.participantTray.resultCarousel .participantCard::after {
+  content: "";
+  position: absolute;
+  left: -18%;
+  right: -18%;
+  top: -18%;
+  height: 42%;
+  background: hsla(var(--h), 96%, 62%, 0.18);
+  filter: blur(30px);
+  transform: rotate(-8deg);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.participantTray.resultCarousel .participantCard.carouselCurrent {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+  z-index: 5;
+}
+
+.participantTray.resultCarousel .participantCard.carouselPrev {
+  transform: translate(-142%, -50%) scale(0.90);
+  opacity: 0.54;
+  z-index: 2;
+  filter: saturate(0.85) brightness(0.86);
+}
+
+.participantTray.resultCarousel .participantCard.carouselNext {
+  transform: translate(42%, -50%) scale(0.90);
+  opacity: 0.54;
+  z-index: 2;
+  filter: saturate(0.85) brightness(0.86);
+}
+
+.participantTray.resultCarousel .participantCard.carouselHiddenLeft {
+  transform: translate(-230%, -50%) scale(0.86);
+  opacity: 0;
+}
+
+.participantTray.resultCarousel .participantCard.carouselHiddenRight {
+  transform: translate(130%, -50%) scale(0.86);
+  opacity: 0;
+}
+
+.participantTray.resultCarousel .orderCardTop,
+.participantTray.resultCarousel .orderHero,
+.participantTray.resultCarousel .orderHint {
+  position: relative;
+  z-index: 2;
+}
+
+.participantTray.resultCarousel .orderCardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.participantTray.resultCarousel .orderChip,
+.participantTray.resultCarousel .participantMini {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: clamp(13px, 3.4vw, 17px);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.participantTray.resultCarousel .orderChip {
+  color: #071020;
+  background: hsla(var(--h), 94%, 66%, 0.98);
+  box-shadow: 0 10px 28px hsla(var(--h), 92%, 58%, 0.30);
+}
+
+.participantTray.resultCarousel .participantMini {
+  color: rgba(255,255,255,0.72);
+  background: rgba(255,255,255,0.10);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12);
+}
+
+.participantTray.resultCarousel .orderHero {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: clamp(16px, 4vh, 28px);
+  min-height: 0;
+}
+
+.participantTray.resultCarousel .participantDot {
+  width: clamp(112px, 28vw, 170px);
+  height: clamp(112px, 28vw, 170px);
+  border: 0;
+  background:
+    radial-gradient(circle at 34% 25%, rgba(255,255,255,0.70), transparent 13%),
+    hsla(var(--h), 94%, 58%, 0.98);
+  box-shadow:
+    0 0 0 12px hsla(var(--h), 94%, 58%, 0.12),
+    0 22px 60px hsla(var(--h), 94%, 58%, 0.34),
+    inset 0 -18px 38px rgba(0,0,0,0.20);
+  color: #fff;
+  font-size: clamp(48px, 13vw, 82px);
+}
+
+.participantTray.resultCarousel .participantText {
+  text-align: center;
+  gap: 8px;
+}
+
+.participantTray.resultCarousel .participantName {
+  color: #fff;
+  font-size: clamp(34px, 8vw, 64px);
+  font-weight: 1000;
+  line-height: 1.02;
+  letter-spacing: -0.06em;
+  text-shadow: 0 10px 34px rgba(0,0,0,0.32);
+}
+
+.participantTray.resultCarousel .participantNo {
+  order: 2;
+  color: rgba(255,255,255,0.62);
+  font-size: clamp(14px, 3.4vw, 18px);
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.participantTray.resultCarousel .bigOrderNumber {
+  position: absolute;
+  right: clamp(18px, 5vw, 40px);
+  bottom: clamp(28px, 6vw, 52px);
+  z-index: 1;
+  color: rgba(255,255,255,0.13);
+  font-size: clamp(170px, 47vw, 360px);
+  font-weight: 1000;
+  line-height: 0.76;
+  letter-spacing: -0.12em;
+  text-shadow: none;
+  pointer-events: none;
+}
+
+.participantTray.resultCarousel .orderHint {
+  justify-self: center;
+  align-self: end;
+  padding: 8px 13px;
+  border-radius: 999px;
+  color: rgba(255,255,255,0.56);
+  background: rgba(255,255,255,0.08);
+  font-size: clamp(12px, 3.1vw, 14px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+body[data-flow="register"][data-state="result"][data-result="order"] .carouselTap {
+  width: 26vw;
+  color: rgba(255,255,255,0.62);
+  font-size: clamp(44px, 11vw, 86px);
+  font-weight: 300;
+  background: transparent;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+body[data-flow="register"][data-state="result"][data-result="order"] .carouselTapLeft {
+  background: linear-gradient(to right, rgba(0,0,0,0.18), transparent);
+}
+
+body[data-flow="register"][data-state="result"][data-result="order"] .carouselTapRight {
+  background: linear-gradient(to left, rgba(0,0,0,0.18), transparent);
+}
+
+body[data-flow="register"][data-state="result"][data-result="order"] .carouselTap:active {
+  color: rgba(255,255,255,0.96);
+  background-color: rgba(255,255,255,0.055);
+}
+
+body[data-flow="register"][data-state="result"][data-result="order"] .carouselCounter {
+  bottom: calc(14px + var(--safe-bottom));
+  padding: 8px 14px;
+  color: rgba(255,255,255,0.84);
+  background: rgba(8, 11, 24, 0.58);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.10), 0 10px 28px rgba(0,0,0,0.22);
+}
+
+@media (max-width: 720px) {
+  body[data-flow="register"][data-state="result"][data-result="order"] .participantTray.resultCarousel {
+    top: calc(64px + var(--safe-top));
+    bottom: calc(24px + var(--safe-bottom));
+  }
+
+  .participantTray.resultCarousel .participantCard {
+    width: 80vw;
+    height: min(69vh, 650px);
+    min-height: 410px;
+    padding: 22px;
+  }
+
+  .participantTray.resultCarousel .orderCardTop {
+    align-items: flex-start;
+  }
+
+  .participantTray.resultCarousel .participantMini {
+    display: none;
+  }
+
+  .participantTray.resultCarousel .participantCard.carouselPrev {
+    transform: translate(-139%, -50%) scale(0.90);
+  }
+
+  .participantTray.resultCarousel .participantCard.carouselNext {
+    transform: translate(39%, -50%) scale(0.90);
+  }
+}
